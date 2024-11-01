@@ -13,10 +13,11 @@ const icLauncherManifestXml =
   + `<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">${EOL}`
   + `    <background android:drawable="@mipmap/ic_launcher_background" />${EOL}`
   + `    <foreground android:drawable="@mipmap/ic_launcher_foreground" />${EOL}`
+  + `    <monochrome android:drawable="@mipmap/ic_launcher_monochrome" />${EOL}`
   + `</adaptive-icon>${EOL}`;
 
 //  Generate Android Manifest icons given a manifest file.
-module.exports = async function generateManifestIcons(backgroundIcon, foregroundIcon, manifest) {
+module.exports = async function generateManifestIcons(backgroundIcon, foregroundIcon, monochromeIcon, manifest) {
   //  Create the object we will return.
   const results = {
     icons: [],
@@ -47,6 +48,11 @@ module.exports = async function generateManifestIcons(backgroundIcon, foreground
       const foregroundOutput = path.join(resourceFolder, icon.foregroundIcon);
       await resizeImage(foregroundIcon, foregroundOutput, icon.size);
       results.icons.push(foregroundOutput);
+    }
+    if (icon.monochromeIcon) {
+      const monochromeOutput = path.join(resourceFolder, icon.monochromeIcon);
+      await resizeImage(monochromeIcon, monochromeOutput, icon.size);
+      results.icons.push(monochromeOutput);
     }
 
     return null;

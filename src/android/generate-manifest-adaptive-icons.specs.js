@@ -6,6 +6,7 @@ const fileExists = require('../utils/file-exists');
 
 const backgroundIcon = './test/icon.background.png';
 const foregroundIcon = './test/icon.foreground.png';
+const monochromeIcon = './test/icon.monochrome.png';
 
 //  The folders we expect to generate, relative to the manifest location.
 const expectedFolders = [
@@ -24,6 +25,7 @@ const expectedFiles = [
   './ic_launcher_round.xml',
   './ic_launcher_background.png',
   './ic_launcher_foreground.png',
+  './ic_launcher_monochrome.png',
 ];
 
 //  Create a test for each manifest.
@@ -59,7 +61,7 @@ describe('generate-manifest-adaptive-icons', () => {
 
       //  Delete all of the folders we're expecting to create, then generate the icons.
       await Promise.all(resourceFolders.map(deleteFolderIfExists));
-      await (generateManifestAdaptiveIcons(backgroundIcon, foregroundIcon, manifestPath));
+      await (generateManifestAdaptiveIcons(backgroundIcon, foregroundIcon, monochromeIcon, manifestPath));
       const filesDoExist = await Promise.all(expectedPaths.map(fileExists));
       filesDoExist.forEach((exists, index) => {
         expect(exists, `${resourceFoldersFiles[index]} should be generated`).to.equal(true);

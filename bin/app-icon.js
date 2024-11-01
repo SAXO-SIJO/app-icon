@@ -45,12 +45,14 @@ program
   .option('-p, --platforms [optional]', "The platforms to generate icons for. Defaults to 'android,ios'", 'android,ios')
   .option('--background-icon [optional]', "The background icon path. Defaults to 'icon.background.png'")
   .option('--foreground-icon [optional]', "The foreground icon path. Defaults to 'icon.foreground.png'")
+  .option('--monochrome-icon [optional]', "The monochrome icon path. Defaults to 'icon.monochrome.png'")
   .option('--adaptive-icons [optional]', "Additionally, generate Android Adaptive Icon templates. Defaults to 'false'")
   .action(async (parameters) => {
     const {
       icon,
       backgroundIcon,
       foregroundIcon,
+      monochromeIcon,
       search,
       platforms,
       adaptiveIcons,
@@ -72,6 +74,7 @@ program
         sourceIcon: icon,
         backgroundIcon,
         foregroundIcon,
+        monochromeIcon,
         searchRoot: search,
         platforms,
         adaptiveIcons,
@@ -132,10 +135,13 @@ program
       if (adaptiveIcons) {
         const inputBackground = path.resolve(__dirname, '../src/init/icon.background.template.png');
         const inputForeground = path.resolve(__dirname, '../src/init/icon.foreground.template.png');
+        const inputMonochrome = path.resolve(__dirname, '../src/init/icon.monochrome.template.png');
         await init(inputBackground, './icon.background.png');
         await init(inputForeground, './icon.foreground.png', { caption });
+        await init(inputMonochrome, './icon.monochrome.png');
         console.log(`Created icon '${chalk.green('icon.background.png')}'`);
         console.log(`Created icon '${chalk.green('icon.foreground.png')}'`);
+        console.log(`Created icon '${chalk.green('icon.monochrome.png')}'`);
       }
     } catch (err) {
       console.error('An error occurred creating the icon...');

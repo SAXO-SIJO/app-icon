@@ -21,6 +21,7 @@ describe('generate', () => {
       sourceIcon: './test/icon.png',
       backgroundIcon: './test/icon.background.png',
       foregroundIcon: './test/icon.foreground.png',
+      monochromeIcon: './test/icon.monochrome.png',
       searchPath: './',
       adaptiveIcons: true,
     };
