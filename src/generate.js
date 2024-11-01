@@ -51,7 +51,6 @@ module.exports = async function generate(parameters) {
     });
 
     if (adaptiveIcons) {
-      console.log("HIT")
       const atvRes = await generateManifestAdaptiveIcons(backgroundIcon, foregroundIcon, monochromeIcon, manifest);
       results.adaptiveIconManifests.push({ manifest, icons: atvRes.icons });
       atvRes.icons.forEach((icon) => {

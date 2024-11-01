@@ -20,11 +20,13 @@ module.exports = function validateParameters(parameters) {
   const adaptiveIcons = !!parameters.adaptiveIcons;
   const backgroundIcon = parameters.backgroundIcon || 'icon.background.png';
   const foregroundIcon = parameters.foregroundIcon || 'icon.foreground.png';
+  const monochromeIcon = parameters.foregroundIcon || 'icon.monochrome.png';
 
   return {
     sourceIcon,
     backgroundIcon,
     foregroundIcon,
+    monochromeIcon,
     searchRoot,
     platforms,
     adaptiveIcons,
