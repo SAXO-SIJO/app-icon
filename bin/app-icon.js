@@ -22,6 +22,15 @@ const errorIfMissing = async (filePath, errorMessage) => {
   }
 };
 
+//  Helper to warn if file could be added
+const warnIfMonochromeMissing = async (filePath, warnMessage) => {
+  try {
+    await fileExists(filePath);
+  } catch (err) {
+    console.warn(`${chalk.yellow('warning')}: ${warnMessage}`);
+  }
+};
+
 const imageMagickCheck = async () => {
   const version = await imagemagickCli.getVersion();
 
@@ -45,7 +54,7 @@ program
   .option('-p, --platforms [optional]', "The platforms to generate icons for. Defaults to 'android,ios'", 'android,ios')
   .option('--background-icon [optional]', "The background icon path. Defaults to 'icon.background.png'")
   .option('--foreground-icon [optional]', "The foreground icon path. Defaults to 'icon.foreground.png'")
-  .option('--monochrome-icon [optional]', "The monochrome icon path. Defaults to 'icon.monochrome.png'")
+  .option('--monochrome-icon [optional]', "The monochrome icon path.")
   .option('--adaptive-icons [optional]', "Additionally, generate Android Adaptive Icon templates. Defaults to 'false'")
   .action(async (parameters) => {
     const {
@@ -61,14 +70,18 @@ program
     await imageMagickCheck();
 
     await errorIfMissing(icon, `Source file '${icon}' does not exist. Add the file or specify source icon with the '--icon' parameter.`);
+  
     if (adaptiveIcons) {
-      const checkPath = backgroundIcon || 'icon.background.png';
-      await errorIfMissing(checkPath, `Background icon file '${checkPath}' does not exist. Add the file or specify background icon with the '--background-icon' parameter.`);
+      const backgroundPath = backgroundIcon || 'icon.background.png';
+      await errorIfMissing(backgroundPath, `Background icon file '${backgroundPath}' does not exist. Add the file or specify background icon with the '--background-icon' parameter.`);
+
+      const foregroundPath = foregroundIcon || 'icon.foreground.png';
+      await errorIfMissing(foregroundPath, `Foreground icon file '${foregroundPath}' does not exist. Add the file or specify foreground icon with the '--foreground-icon' parameter.`);
+
+      const monochromePath = monochromeIcon || 'icon.monochrome.png';
+      await warnIfMonochromeMissing(monochromePath, `Monochrome icon file '${monochromePath}' was not added as part of adaptive icons`)
     }
-    if (adaptiveIcons) {
-      const checkPath = foregroundIcon || 'icon.foreground.png';
-      await errorIfMissing(checkPath, `Foreground icon file '${checkPath}' does not exist. Add the file or specify foreground icon with the '--foreground-icon' parameter.`);
-    }
+  
     try {
       await generate({
         sourceIcon: icon,
