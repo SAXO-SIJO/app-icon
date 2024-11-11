@@ -48,11 +48,6 @@ module.exports = async function generateIconSetIcons(
      
       results.icons.push(targetName);
       contents.images.push({
-        size: image.size,
-        idiom: image.idiom,
-        scale: image.scale,
-        filename: targetName,
-        ...(doesDarkExist && { platform: 'ios' }),
         ...(image.isDark && {
           appearances: [
             {
@@ -61,6 +56,11 @@ module.exports = async function generateIconSetIcons(
             },
           ],
         }),
+        filename: targetName,
+        idiom: image.idiom,
+        ...(doesDarkExist && { platform: 'ios' }),
+        scale: image.scale,
+        size: image.size,
       });
     })
   );
