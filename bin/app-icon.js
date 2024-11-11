@@ -23,7 +23,7 @@ const errorIfMissing = async (filePath, errorMessage) => {
 };
 
 //  Helper to warn if file could be added
-const warnIfMonochromeMissing = async (filePath, warnMessage) => {
+const warnIfMissing = async (filePath, warnMessage) => {
   try {
     await fileExists(filePath);
   } catch (err) {
@@ -55,6 +55,7 @@ program
   .option('--background-icon [optional]', "The background icon path. Defaults to 'icon.background.png'")
   .option('--foreground-icon [optional]', "The foreground icon path. Defaults to 'icon.foreground.png'")
   .option('--monochrome-icon [optional]', "The monochrome icon path.")
+  .option('--dark-icon [optional]', "The IOS dark path.")
   .option('--adaptive-icons [optional]', "Additionally, generate Android Adaptive Icon templates. Defaults to 'false'")
   .action(async (parameters) => {
     const {
@@ -62,6 +63,7 @@ program
       backgroundIcon,
       foregroundIcon,
       monochromeIcon,
+      darkIcon,
       search,
       platforms,
       adaptiveIcons,
@@ -79,7 +81,12 @@ program
       await errorIfMissing(foregroundPath, `Foreground icon file '${foregroundPath}' does not exist. Add the file or specify foreground icon with the '--foreground-icon' parameter.`);
 
       const monochromePath = monochromeIcon || 'icon.monochrome.png';
-      await warnIfMonochromeMissing(monochromePath, `Monochrome icon file '${monochromePath}' was not added as part of adaptive icons`)
+      await warnIfMissing(monochromePath, `Monochrome icon file '${monochromePath}' was not added as part of adaptive icons`)
+    }
+
+    if(darkIcon) {
+      const darkPath = darkIcon || 'icon.iosdark.png';
+      await warnIfMissing(darkPath, `IOS dark icon file '${darkPath}' was not added`)
     }
   
     try {
@@ -88,6 +95,7 @@ program
         backgroundIcon,
         foregroundIcon,
         monochromeIcon,
+        darkIcon,
         searchRoot: search,
         platforms,
         adaptiveIcons,

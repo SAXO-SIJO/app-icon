@@ -13,6 +13,7 @@ module.exports = async function generate(parameters) {
     backgroundIcon,
     foregroundIcon,
     monochromeIcon,
+    darkIcon,
     searchRoot,
     platforms,
     adaptiveIcons,
@@ -30,7 +31,7 @@ module.exports = async function generate(parameters) {
     if (!platforms.includes('ios')) return null;
     console.log(`Found iOS iconset: ${iconset}...`);
 
-    const { icons } = await generateIconsetIcons(sourceIcon, iconset);
+    const { icons } = await generateIconsetIcons(sourceIcon, iconset, darkIcon);
     results.iconsets.push({ iconset, icons });
     icons.forEach((icon) => {
       console.log(`    ${chalk.green('✓')}  Generated icon ${icon}`);

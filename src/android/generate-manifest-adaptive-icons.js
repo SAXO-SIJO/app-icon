@@ -4,11 +4,19 @@ const { EOL } = require('os');
 const mkdirp = require('mkdirp');
 
 const androidManifestAdaptiveIcons = require('./AndroidManifest.adaptive-icons.json');
+const androidManifestAdaptiveIconsMonochrome = require('./AndroidManifest.adaptive-icons.monochrome.json');
 const resizeImage = require('../resize/resize-image');
 
 //  The XML for the ic launcher manifest.
 //  eslint-disable-next-line
 const icLauncherManifestXml =
+    `<?xml version="1.0" encoding="utf-8"?>${EOL}`
+  + `<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">${EOL}`
+  + `    <background android:drawable="@mipmap/ic_launcher_background" />${EOL}`
+  + `    <foreground android:drawable="@mipmap/ic_launcher_foreground" />${EOL}`
+  + `</adaptive-icon>${EOL}`;
+
+  const icLauncherMonochromeManifestXml =
     `<?xml version="1.0" encoding="utf-8"?>${EOL}`
   + `<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">${EOL}`
   + `    <background android:drawable="@mipmap/ic_launcher_background" />${EOL}`
@@ -26,15 +34,19 @@ module.exports = async function generateManifestIcons(backgroundIcon, foreground
   //  We've got the manifest file, get the parent folder.
   const manifestFolder = path.dirname(manifest);
 
+  //  We've got the right list of icons to expect
+  const androidManifest = monochromeIcon ? androidManifestAdaptiveIconsMonochrome : androidManifestAdaptiveIcons;
+
   //  Generate each image in the full icon set, updating the contents.
-  await Promise.all(androidManifestAdaptiveIcons.adaptiveIcons.map(async (icon) => {
+  await Promise.all(androidManifest.adaptiveIcons.map(async (icon) => {
     //  Each icon lives in its own folder, so we'd better make sure that folder
     //  exists.
     const resourceFolder = path.join(manifestFolder, icon.folder);
     await mkdirp(resourceFolder);
-
-    fs.writeFileSync(path.join(resourceFolder, 'ic_launcher.xml'), icLauncherManifestXml, 'utf8');
-    fs.writeFileSync(path.join(resourceFolder, 'ic_launcher_round.xml'), icLauncherManifestXml, 'utf8');
+    
+    const icLauncherManifest = monochromeIcon ? icLauncherMonochromeManifestXml : icLauncherManifestXml; 
+    fs.writeFileSync(path.join(resourceFolder, 'ic_launcher.xml'), icLauncherManifest, 'utf8');
+    fs.writeFileSync(path.join(resourceFolder, 'ic_launcher_round.xml'), icLauncherManifest, 'utf8');
 
     //  If the manifest requires us to generate icons for the folder, do so.
     //  Not *every* folder has icons - for example the 'anydpi' folder will

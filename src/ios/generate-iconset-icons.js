@@ -1,14 +1,20 @@
-const path = require('path');
-const fs = require('fs');
-const { promisify } = require('util');
+const path = require("path");
+const fs = require("fs");
+const { promisify } = require("util");
 
 const writeFileAsync = promisify(fs.writeFile);
 
-const resizeImage = require('../resize/resize-image');
-const contentsTemplate = require('./AppIcon.iconset.Contents.template.json');
+const resizeImage = require("../resize/resize-image");
+const baseContentsTemplate = require("./AppIcon.iconset.Contents.template.json");
+const universalContentTemplate = require("./AppIcon.iconset.Contents.Universal.template.json");
+const fileExists = require("../utils/file-exists");
 
 //  Generate xCode icons given an iconset folder.
-module.exports = async function generateIconSetIcons(sourceIcon, iconset) {
+module.exports = async function generateIconSetIcons(
+  sourceIcon,
+  iconset,
+  darkIcon
+) {
   //  Build the results object.
   const results = {
     icons: [],
@@ -16,29 +22,63 @@ module.exports = async function generateIconSetIcons(sourceIcon, iconset) {
   };
 
   //  We've got the iconset folder. Get the contents Json.
-  const contentsPath = path.join(iconset, 'Contents.json');
-  const contents = JSON.parse(fs.readFileSync(contentsPath, 'utf8'));
+  const contentsPath = path.join(iconset, "Contents.json");
+  const contents = JSON.parse(fs.readFileSync(contentsPath, "utf8"));
   contents.images = [];
 
-  //  Generate each image in the full icon set, updating the contents.
-  await Promise.all(contentsTemplate.images.map(async (image) => {
-    const targetName = `${image.idiom}-${image.size}-${image.scale}.png`;
-    const targetPath = path.join(iconset, targetName);
-    const targetScale = parseInt(image.scale.slice(0, 1), 10);
-    const targetSize = image.size.split('x').map((p) => p * targetScale).join('x');
-    await resizeImage(sourceIcon, targetPath, targetSize);
-    results.icons.push(targetName);
-    contents.images.push({
-      size: image.size,
-      idiom: image.idiom,
-      scale: image.scale,
-      filename: targetName,
-    });
-  }));
+  // check if dark icon exits, if it does, build for universal, else build for default
+  const doesDarkExist = await fileExists(darkIcon ?? "");
 
-  contents.images.sort((imageA, imageB) => imageA.filename.localeCompare(imageB.filename));
+  const contentsTemplate = doesDarkExist
+    ? universalContentTemplate
+    : baseContentsTemplate;
+
+  //  Generate each image in the full icon set, updating the contents.
+  await Promise.all(
+    contentsTemplate.images.map(async (image) => {
+      const targetName = generateName(image);
+      const targetPath = path.join(iconset, targetName);
+      const targetScale = parseInt(image.scale.slice(0, 1), 10);
+      const targetSize = image.size
+        .split("x")
+        .map((p) => p * targetScale)
+        .join("x");
+
+      await resizeImage(image.isDark ? darkIcon : sourceIcon, targetPath, targetSize);
+     
+      results.icons.push(targetName);
+      contents.images.push({
+        size: image.size,
+        idiom: image.idiom,
+        scale: image.scale,
+        filename: targetName,
+        ...(doesDarkExist && { platform: 'ios' }),
+        ...(image.isDark && {
+          appearances: [
+            {
+              appearance: "luminosity",
+              value: "dark",
+            },
+          ],
+        }),
+      });
+    })
+  );
+
+  contents.images.sort((imageA, imageB) =>
+    imageA.filename.localeCompare(imageB.filename)
+  );
   await writeFileAsync(contentsPath, JSON.stringify(contents, null, 2));
   results.contentsPath = contentsPath;
 
   return results;
+};
+
+const generateName = (image) => {
+  const baseNaming = `${image.idiom}-${image.size}-${image.scale}`;
+  const darkNaming = `${baseNaming}-dark`;
+
+  const returnNaming = `${image.isDark ? darkNaming : baseNaming}.png`
+
+  return returnNaming;
 };
